@@ -1,0 +1,23 @@
+.anchor-pane {
+    -fx-background-color: #22252b;
+}
+
+.upper-pane {
+    -fx-background-color: #DBA11C;
+}
+
+.title {
+    -fx-font-family: Inter;
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-fill: #DBA11C;
+}
+
+.text-area {
+    -fx-background-color: #2E3B50;
+    -text-area-background: #2E3B50;
+}
+
+.text-area .content {
+    -fx-background-color: text-area-background ;
+}
