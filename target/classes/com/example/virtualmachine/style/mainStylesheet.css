@@ -2,8 +2,32 @@
     -fx-background-color: #22252b;
 }
 
-.upper-pane {
+.yellow-pane {
     -fx-background-color: #DBA11C;
+}
+
+#yellow-pane-left {
+    -fx-background-radius: 0px 0px 15px 0px;
+}
+
+#yellow-pane-right {
+    -fx-background-radius: 0px 0px 0px 15px;
+}
+
+.blue-pane {
+    -fx-background-color: #2E3B50;
+    -fx-background-radius: 15px;
+}
+
+.default-pane {
+    -fx-effect: dropshadow(three-pass-box, #171717, 10, .005, 10, 10);
+}
+
+.radio-button {
+    -fx-text-fill: #FFF;
+    -fx-font-family: Inter;
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
 }
 
 .title {
@@ -11,13 +35,16 @@
     -fx-font-size: 24px;
     -fx-font-weight: 700;
     -fx-fill: #DBA11C;
+
 }
 
-.text-area {
-    -fx-background-color: #2E3B50;
-    -text-area-background: #2E3B50;
+.button {
+    -fx-text-fill: #FFF;
+    -fx-font-family: Inter;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
 }
 
-.text-area .content {
-    -fx-background-color: text-area-background ;
+.scroll-pane .table-view{
+    -fx-border-radius: 15px;
 }
