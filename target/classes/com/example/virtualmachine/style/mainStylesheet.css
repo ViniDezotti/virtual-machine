@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 .anchor-pane {
     -fx-background-color: #22252b;
 }
@@ -48,3 +49,25 @@
 .scroll-pane .table-view{
     -fx-border-radius: 15px;
 }
+=======
+.menu-item {
+    -fx-font-family: Inter;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.text {
+    -fx-font-family: Inter;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.table-view .text{
+    -fx-font-family: Inter;
+    -fx-font-size:14px;
+    -fx-font-weight: 800;
+}
+
+
+.radio-button
+>>>>>>> Stashed changes

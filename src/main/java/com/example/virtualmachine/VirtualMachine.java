@@ -18,6 +18,7 @@ public class VirtualMachine extends Application {
         stage.show();
     }
 
+
     public static void main(String[] args) {
 //        launch();
         CodeRunner code = new CodeRunner("Prog1.txt");
