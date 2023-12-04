@@ -11,7 +11,7 @@ public class CodeRunner {
     private int stackPointer;
     private int programCounter;
     private Map<String, Integer> map;
-
+    private boolean pcNotChanged;
 
     public CodeRunner(String objFile) {
         this.code = saveObjFile(objFile);
@@ -19,10 +19,10 @@ public class CodeRunner {
         this.stackPointer = -1;
         this.programCounter = 0;
         this.map = new HashMap<>();
+        this.pcNotChanged = true;
 
         allocMemory(100);
         changArgForLine();
-        execute();
     }
 
     private List<String> saveObjFile(String objFile) {
@@ -38,165 +38,174 @@ public class CodeRunner {
         return code;
     }
 
+    public void executeAll() {
+        while (programCounter < code.size()) {
+            execute();
+        }
+    }
+
+    public void executeStepByStep() {
+        if (programCounter < code.size()) {
+            execute();
+        }
+    }
+
     public void execute() {
         String instruction = "";
         String arg1 = "";
         String arg2 = "";
         String line = "";
-        boolean pcNotChanged = true;
 
-        while (programCounter < code.size()) {
-            try {
-                line = code.get(programCounter);
+        try {
+            line = code.get(programCounter);
 
-                instruction = line.substring(4, 11).strip();
-                arg1 = line.substring(12, 15).strip();
-                arg2 = line.substring(16, 19).strip();
-            } catch (StringIndexOutOfBoundsException ex) {
+            instruction = line.substring(4, 11).strip();
+            arg1 = line.substring(12, 15).strip();
+            arg2 = line.substring(16, 19).strip();
+        } catch (StringIndexOutOfBoundsException ex) {
 
-            }
-
-            switch (instruction) {
-                case "LDC" -> {
-                    stackPointer++;
-                    memory.set(stackPointer, arg1);
-                }
-                case "LDV" -> {
-                    String value = memory.get(Integer.parseInt(arg1));
-
-                    stackPointer++;
-                    memory.set(stackPointer, value);
-                }
-                case "ADD" -> {
-                    resolveArithmetic("+");
-                }
-                case "SUB" -> {
-                    resolveArithmetic("-");
-                }
-                case "MULT" -> {
-                    resolveArithmetic("*");
-                }
-                case "DIVI" -> {
-                    resolveArithmetic("/");
-                }
-                case "AND" -> {
-                    resolveArithmetic("&");
-                }
-                case "OR" -> {
-                    resolveArithmetic("|");
-                }
-                case "INV" -> {
-                    int value = - Integer.parseInt(memory.get(stackPointer));
-                    memory.set(stackPointer, String.valueOf(value));
-                }
-                case "NEG" -> {
-                    int value = 1 - Integer.parseInt(memory.get(stackPointer));
-                    memory.set(stackPointer, String.valueOf(value));
-                }
-                case "CME" -> {
-                    resolveRelational("<");
-                }
-                case "CMA" -> {
-                    resolveRelational(">");
-                }
-                case "CEQ" -> {
-                    resolveRelational("==");
-                }
-                case "CDIF" -> {
-                    resolveRelational("!=");
-                }
-                case "CMEQ" -> {
-                    resolveRelational("<=");
-                }
-                case "CMAQ" -> {
-                    resolveRelational(">=");
-                }
-                case "STR" -> {
-                    String value = memory.get(stackPointer);
-
-                    memory.set(Integer.parseInt(arg1), value);
-                    stackPointer--;
-                }
-                case "JMP" -> {
-                    programCounter = map.get(arg1);
-                    pcNotChanged = false;
-                }
-                case "JMPF" -> {
-                    if (Objects.equals(memory.get(stackPointer), "0")) {
-                        programCounter = map.get(arg1);
-                        pcNotChanged = false;
-                    }
-                    stackPointer--;
-                }
-                case "NULL" -> {
-
-                }
-                case "RD" -> {
-                    stackPointer++;
-                    //TODO memory.push(entrada)
-                    Scanner scanner = new Scanner(System.in);
-                    System.out.print("Leia (" + code.get(programCounter+1).substring(12, 16) + "): ");
-                    memory.set(stackPointer, scanner.nextLine());
-                }
-                case "PRN" -> {
-                    //TODO imprimir(memory.pop);
-                    System.out.println("Print: " + memory.get(stackPointer));
-                    stackPointer--;
-                }
-                case "START" -> {
-                    this.stackPointer = -1;
-                }
-                case "ALLOC" -> {
-                    int memoryOffset = Integer.parseInt(arg1);
-                    int varAmount = Integer.parseInt(arg2);
-                    String value;
-
-                    for (int k = 0; k < varAmount; k++) {
-                        stackPointer++;
-                        value = memory.get(memoryOffset + k);
-                        memory.set(stackPointer, value);
-                    }
-                }
-                case "DALLOC" -> {
-                    int memoryOffset = Integer.parseInt(arg1);
-                    int varAmount = Integer.parseInt(arg2);
-                    String value;
-
-                    for (int k = varAmount - 1; k >= 0; k--) {
-                        value = memory.get(stackPointer);
-                        memory.set(memoryOffset + k, value);
-                        stackPointer--;
-                    }
-                }
-                case "CALL" -> {
-                    String value = String.valueOf(programCounter + 1);
-
-                    stackPointer++;
-                    memory.set(stackPointer, value);
-                    programCounter = map.get(arg1);
-                    pcNotChanged = false;
-                }
-                case "RETURN" -> {
-                    programCounter = Integer.parseInt(memory.get(stackPointer));
-                    pcNotChanged = false;
-                    stackPointer--;
-                }
-                case "HLT" -> {
-                    return;
-                }
-            }
-
-            if (pcNotChanged) {
-                programCounter++;
-            } else {
-                pcNotChanged = true;
-            }
-
-            System.out.println("Pilha: " + memory);
-            System.out.println("Instrução: " + line);
-            System.out.println("SP: " + stackPointer);
-            System.out.println("");
         }
+
+        switch (instruction) {
+            case "LDC" -> {
+                stackPointer++;
+                memory.set(stackPointer, arg1);
+            }
+            case "LDV" -> {
+                String value = memory.get(Integer.parseInt(arg1));
+
+                stackPointer++;
+                memory.set(stackPointer, value);
+            }
+            case "ADD" -> {
+                resolveArithmetic("+");
+            }
+            case "SUB" -> {
+                resolveArithmetic("-");
+            }
+            case "MULT" -> {
+                resolveArithmetic("*");
+            }
+            case "DIVI" -> {
+                resolveArithmetic("/");
+            }
+            case "AND" -> {
+                resolveArithmetic("&");
+            }
+            case "OR" -> {
+                resolveArithmetic("|");
+            }
+            case "INV" -> {
+                int value = - Integer.parseInt(memory.get(stackPointer));
+                memory.set(stackPointer, String.valueOf(value));
+            }
+            case "NEG" -> {
+                int value = 1 - Integer.parseInt(memory.get(stackPointer));
+                memory.set(stackPointer, String.valueOf(value));
+            }
+            case "CME" -> {
+                resolveRelational("<");
+            }
+            case "CMA" -> {
+                resolveRelational(">");
+            }
+            case "CEQ" -> {
+                resolveRelational("==");
+            }
+            case "CDIF" -> {
+                resolveRelational("!=");
+            }
+            case "CMEQ" -> {
+                resolveRelational("<=");
+            }
+            case "CMAQ" -> {
+                resolveRelational(">=");
+            }
+            case "STR" -> {
+                String value = memory.get(stackPointer);
+
+                memory.set(Integer.parseInt(arg1), value);
+                stackPointer--;
+            }
+            case "JMP" -> {
+                programCounter = map.get(arg1);
+                pcNotChanged = false;
+            }
+            case "JMPF" -> {
+                if (Objects.equals(memory.get(stackPointer), "0")) {
+                    programCounter = map.get(arg1);
+                    pcNotChanged = false;
+                }
+                stackPointer--;
+            }
+            case "NULL" -> {
+
+            }
+            case "RD" -> {
+                stackPointer++;
+                //TODO memory.push(entrada)
+                Scanner scanner = new Scanner(System.in);
+                System.out.print("Leia (" + code.get(programCounter+1).substring(12, 16) + "): ");
+                memory.set(stackPointer, scanner.nextLine());
+            }
+            case "PRN" -> {
+                //TODO imprimir(memory.pop);
+                System.out.println("Print: " + memory.get(stackPointer));
+                stackPointer--;
+            }
+            case "START" -> {
+                this.stackPointer = -1;
+            }
+            case "ALLOC" -> {
+                int memoryOffset = Integer.parseInt(arg1);
+                int varAmount = Integer.parseInt(arg2);
+                String value;
+
+                for (int k = 0; k < varAmount; k++) {
+                    stackPointer++;
+                    value = memory.get(memoryOffset + k);
+                    memory.set(stackPointer, value);
+                }
+            }
+            case "DALLOC" -> {
+                int memoryOffset = Integer.parseInt(arg1);
+                int varAmount = Integer.parseInt(arg2);
+                String value;
+
+                for (int k = varAmount - 1; k >= 0; k--) {
+                    value = memory.get(stackPointer);
+                    memory.set(memoryOffset + k, value);
+                    stackPointer--;
+                }
+            }
+            case "CALL" -> {
+                String value = String.valueOf(programCounter + 1);
+
+                stackPointer++;
+                memory.set(stackPointer, value);
+                programCounter = map.get(arg1);
+                pcNotChanged = false;
+            }
+            case "RETURN" -> {
+                programCounter = Integer.parseInt(memory.get(stackPointer));
+                pcNotChanged = false;
+                stackPointer--;
+            }
+            case "HLT" -> {
+                return;
+            }
+        }
+
+        if (pcNotChanged) {
+            programCounter++;
+        } else {
+            pcNotChanged = true;
+        }
+
+        System.out.println("Pilha: " + memory);
+        System.out.println("Instrução: " + line);
+        System.out.println("SP: " + stackPointer);
+        System.out.println("");
     }
 
     private void resolveRelational(String s) {
