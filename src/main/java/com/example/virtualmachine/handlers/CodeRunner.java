@@ -1,5 +1,7 @@
 package com.example.virtualmachine.handlers;
 
+import org.controlsfx.control.tableview2.filter.filtereditor.SouthFilter;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,8 +9,7 @@ import java.util.*;
 
 public class CodeRunner {
     private final List<String> code;
-    private Stack<String> memory;
-    private Stack<String> auxMemory;
+    private List<String> memory;
     private int stackPointer;
     private int programCounter;
     private Map<String, Integer> map;
@@ -17,11 +18,11 @@ public class CodeRunner {
     public CodeRunner(String objFile) {
         this.code = saveObjFile(objFile);
         this.memory = new Stack<>();
-        this.auxMemory = new Stack<>();
         this.stackPointer = -1;
         this.programCounter = 0;
         this.map = new HashMap<>();
 
+        allocMemory(100);
         changArgForLine();
         execute();
     }
@@ -60,13 +61,13 @@ public class CodeRunner {
             switch (instruction) {
                 case "LDC" -> {
                     stackPointer++;
-                    memory.push(arg1);
+                    memory.set(stackPointer, arg1);
                 }
                 case "LDV" -> {
                     String value = memory.get(Integer.parseInt(arg1));
 
                     stackPointer++;
-                    memory.push(value);
+                    memory.set(stackPointer, value);
                 }
                 case "ADD" -> {
                     resolveArithmetic("+");
@@ -87,12 +88,12 @@ public class CodeRunner {
                     resolveArithmetic("|");
                 }
                 case "INV" -> {
-                    int value = Integer.parseInt(memory.pop());
-                    memory.push(String.valueOf(-value));
+                    int value = - Integer.parseInt(memory.get(stackPointer));
+                    memory.set(stackPointer, String.valueOf(value));
                 }
                 case "NEG" -> {
-                    int value = Integer.parseInt(memory.pop());
-                    memory.push(String.valueOf(1 - value));
+                    int value = 1 - Integer.parseInt(memory.get(stackPointer));
+                    memory.set(stackPointer, String.valueOf(value));
                 }
                 case "CME" -> {
                     resolveExpression("<");
@@ -113,37 +114,21 @@ public class CodeRunner {
                     resolveExpression(">=");
                 }
                 case "STR" -> {
-                    String value = memory.pop();
+                    String value = memory.get(stackPointer);
 
-                    if (memory.size() > Integer.parseInt(arg1)) {
-                        memory.set(Integer.parseInt(arg1), value);
-                    } else {
-                        memory.push(value);
-                    }
-
+                    memory.set(Integer.parseInt(arg1), value);
                     stackPointer--;
-
-//                    while (!memory.isEmpty()) {
-//                        if (memory.size() - 1 == Integer.parseInt(arg1)) {
-//                            memory.pop();
-//                            memory.push(value);
-//                            while (!auxMemory.isEmpty()) {
-//                                memory.push(auxMemory.pop());
-//                            }
-//                            break;
-//                        }
-//                        auxMemory.push(memory.pop());
-//                    }
                 }
                 case "JMP" -> {
                     programCounter = map.get(arg1);
                     pcNotChanged = false;
                 }
                 case "JMPF" -> {
-                    if (Objects.equals(memory.pop(), "0")) {
+                    if (Objects.equals(memory.get(stackPointer), "0")) {
                         programCounter = map.get(arg1);
                         pcNotChanged = false;
-                    } else stackPointer--;
+                    }
+                    stackPointer--;
                 }
                 case "NULL" -> {
 
@@ -153,67 +138,53 @@ public class CodeRunner {
                     //TODO memory.push(entrada)
                     Scanner scanner = new Scanner(System.in);
                     System.out.print("Leia (" + code.get(programCounter+1).substring(12, 16) + "): ");
-                    memory.push(scanner.nextLine());
+                    memory.set(stackPointer, scanner.nextLine());
                 }
                 case "PRN" -> {
-                    stackPointer--;
                     //TODO imprimir(memory.pop);
-                    System.out.println(memory.pop());
+                    System.out.println("Print: " + memory.get(stackPointer));
+                    stackPointer--;
                 }
                 case "START" -> {
                     this.stackPointer = -1;
                 }
                 case "ALLOC" -> {
-                    stackPointer += Integer.parseInt(arg1);
+                    int memoryOffset = Integer.parseInt(arg1);
+                    int varAmount = Integer.parseInt(arg2);
+                    String value;
 
-                    for (int i = 0; i < Integer.parseInt(arg2); i++) {
-
-                        if (memory.empty()) {
-                            memory.push("0");
-                        } else {
-                            memory.push(memory.lastElement());
-                        }
+                    for (int k = 0; k < varAmount; k++) {
+                        stackPointer++;
+                        value = memory.get(memoryOffset + k);
+                        memory.set(stackPointer, value);
                     }
                 }
                 case "DALLOC" -> {
-                    String lastElement;
+                    int memoryOffset = Integer.parseInt(arg1);
+                    int varAmount = Integer.parseInt(arg2);
+                    String value;
 
-                    for (int i = 0; i < Integer.parseInt(arg2); i++) {
-                        lastElement = memory.pop();
-
-                        if (!memory.empty()) {
-                            memory.set(memory.size() - 1, lastElement);
-                        }
+                    for (int k = varAmount; k > 0; k--) {
+                        value = memory.get(stackPointer);
+                        memory.set(memoryOffset + k, value);
+                        stackPointer--;
                     }
-
-                    stackPointer -= Integer.parseInt(arg1);
-//                    while (!memory.isEmpty()) {
-//                        if (memory.size() - 1 == Integer.parseInt(arg1)) {
-//                            int index = 0;
-//                            while (index < Integer.parseInt(arg1)) {
-//                                auxMemory.pop();
-//                                index++;
-//                            }
-//                            while (!auxMemory.isEmpty()) {
-//                                memory.push(auxMemory.pop());
-//                            }
-//                        }
-//                        auxMemory.push(memory.pop());
-//                    }
                 }
                 case "CALL" -> {
+                    String value = String.valueOf(programCounter + 1);
+
                     stackPointer++;
-                    memory.push(String.valueOf(programCounter + 1));
+                    memory.set(stackPointer, value);
                     programCounter = map.get(arg1);
                     pcNotChanged = false;
                 }
                 case "RETURN" -> {
-                    programCounter = Integer.parseInt(memory.pop());
+                    programCounter = Integer.parseInt(memory.get(stackPointer));
                     pcNotChanged = false;
                     stackPointer--;
                 }
                 case "HLT" -> {
-
+                    return;
                 }
             }
 
@@ -222,7 +193,11 @@ public class CodeRunner {
             } else {
                 pcNotChanged = true;
             }
-            System.out.println(memory);
+
+            System.out.println("Pilha: " + memory);
+            System.out.println("Instrução: " + line);
+            System.out.println("SP: " + stackPointer);
+            System.out.println("");
         }
     }
 
@@ -261,33 +236,33 @@ public class CodeRunner {
     }
 
     private void resolveArithmetic(String s) {
-        int value1 = Integer.parseInt(memory.pop());
-        int value2 = Integer.parseInt(memory.pop());
+        int value1 = Integer.parseInt(memory.get(stackPointer - 1));
+        int value2 = Integer.parseInt(memory.get(stackPointer));
 
         switch (s) {
             case "+" -> {
-                memory.push(String.valueOf(value2 + value1));
+                memory.set(stackPointer - 1, String.valueOf(value1 + value2));
             }
             case "-" -> {
-                memory.push(String.valueOf(value2 - value1));
+                memory.set(stackPointer - 1, String.valueOf(value1 - value2));
             }
             case "*" -> {
-                memory.push(String.valueOf(value2 * value1));
+                memory.set(stackPointer - 1, String.valueOf(value1 * value2));
             }
             case "/" -> {
-                memory.push(String.valueOf(value2 / value1));
+                memory.set(stackPointer - 1, String.valueOf(value1 / value2));
             }
             case "&" -> {
-                memory.push(String.valueOf(value2 & value1));
+                memory.set(stackPointer - 1, String.valueOf(value1 & value2));
             }
             case "|" -> {
-                memory.push(String.valueOf(value2 | value1));
+                memory.set(stackPointer - 1, String.valueOf(value1 | value2));
             }
         }
         stackPointer--;
     }
 
-    public void changArgForLine() {
+    private void changArgForLine() {
         String label = "";
 
         for (int i = 0; i < code.size() ;i++) {
@@ -295,6 +270,12 @@ public class CodeRunner {
             if(!label.isEmpty()){
                 map.put(label, i);
             }
+        }
+    }
+
+    private void allocMemory(int size) {
+        for (int i = 0; i<size;i++) {
+            memory.add("0");
         }
     }
 }
