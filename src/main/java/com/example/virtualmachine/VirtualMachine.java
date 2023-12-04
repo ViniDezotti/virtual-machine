@@ -12,14 +12,15 @@ public class VirtualMachine extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VirtualMachine.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1440, 1024);
+        Scene scene = new Scene(fxmlLoader.load(), 1366, 768);
         stage.setTitle("Hello!");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
     public static void main(String[] args) {
-//        launch();
-        CodeRunner code = new CodeRunner("Prog1.obj");
+        launch();
+//        CodeRunner code = new CodeRunner("Prog1.obj");
     }
 }
