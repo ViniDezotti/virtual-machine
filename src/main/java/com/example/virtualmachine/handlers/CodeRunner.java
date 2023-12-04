@@ -13,6 +13,50 @@ public class CodeRunner {
     private Map<String, Integer> map;
     private boolean pcNotChanged;
 
+    public List<String> getCode() {
+        return code;
+    }
+
+    public List<String> getMemory() {
+        return memory;
+    }
+
+    public void setMemory(List<String> memory) {
+        this.memory = memory;
+    }
+
+    public int getStackPointer() {
+        return stackPointer;
+    }
+
+    public void setStackPointer(int stackPointer) {
+        this.stackPointer = stackPointer;
+    }
+
+    public int getProgramCounter() {
+        return programCounter;
+    }
+
+    public void setProgramCounter(int programCounter) {
+        this.programCounter = programCounter;
+    }
+
+    public Map<String, Integer> getMap() {
+        return map;
+    }
+
+    public void setMap(Map<String, Integer> map) {
+        this.map = map;
+    }
+
+    public boolean isPcNotChanged() {
+        return pcNotChanged;
+    }
+
+    public void setPcNotChanged(boolean pcNotChanged) {
+        this.pcNotChanged = pcNotChanged;
+    }
+
     public CodeRunner(String objFile) {
         this.code = saveObjFile(objFile);
         this.memory = new Stack<>();
@@ -58,7 +102,6 @@ public class CodeRunner {
 
         try {
             line = code.get(programCounter);
-
             instruction = line.substring(4, 11).strip();
             arg1 = line.substring(12, 15).strip();
             arg2 = line.substring(16, 19).strip();

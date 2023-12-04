@@ -15,44 +15,49 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0" styleClass="anchor-pane" stylesheets="@style/mainStylesheet.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1366.0" styleClass="anchor-pane" stylesheets="@style/mainStylesheet.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.virtualmachine.VirtualMachineController">
    <children>
       <MenuBar layoutX="22.0" layoutY="2.0" AnchorPane.bottomAnchor="740.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <menus>
             <Menu mnemonicParsing="false" text="Arquivo">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Arquivo" />
+                  <MenuItem fx:id="btnOpenFile" mnemonicParsing="false" onAction="#openFile" text="Abrir" />
                </items>
             </Menu>
          </menus>
       </MenuBar>
-      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="400.0" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="1046.0" AnchorPane.topAnchor="186.0">
+      <HBox prefHeight="35.0" AnchorPane.bottomAnchor="547.0" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="1046.0" AnchorPane.topAnchor="186.0">
          <children>
-            <HBox prefHeight="35.0">
-               <children>
-                  <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="119.0" text="Iniciar" HBox.hgrow="ALWAYS">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </Button>
-                  <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="119.0" text="Parar">
-                     <HBox.margin>
-                        <Insets left="24.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
-            <RadioButton mnemonicParsing="false" selected="true" text="Normal">
-               <toggleGroup>
-                  <ToggleGroup fx:id="RbSelectMode" />
-               </toggleGroup>
+            <Button fx:id="btnStart" disable="true" mnemonicParsing="false" prefHeight="35.0" prefWidth="119.0" text="Iniciar" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="btnStop" disable="true" mnemonicParsing="false" prefHeight="35.0" prefWidth="119.0" text="Parar">
+               <HBox.margin>
+                  <Insets left="24.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
+      <VBox prefHeight="200.0" prefWidth="100.0" styleClass="pane" AnchorPane.bottomAnchor="432.0" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="1046.0" AnchorPane.topAnchor="235.0">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Tipos de execução">
                <VBox.margin>
-                  <Insets top="24.0" />
+                  <Insets left="10.0" top="10.0" />
                </VBox.margin>
-            </RadioButton>
-            <RadioButton depthTest="DISABLE" mnemonicParsing="false" text="Passo a passo" toggleGroup="$RbSelectMode">
+            </Text>
+            <RadioButton fx:id="rbNormalMode" mnemonicParsing="false" selected="true" text="Normal">
                <VBox.margin>
-                  <Insets top="10.0" />
+                  <Insets left="20.0" top="10.0" />
+               </VBox.margin>
+               <toggleGroup>
+                  <ToggleGroup fx:id="selectMode" />
+               </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="rbPassThrough" depthTest="DISABLE" mnemonicParsing="false" text="Passo a passo" toggleGroup="$selectMode">
+               <VBox.margin>
+                  <Insets left="20.0" top="10.0" />
                </VBox.margin>
             </RadioButton>
          </children>
@@ -60,12 +65,13 @@
       <VBox layoutX="157.0" layoutY="100.0" prefHeight="570.0" prefWidth="523.0" AnchorPane.bottomAnchor="155.0" AnchorPane.leftAnchor="344.0" AnchorPane.rightAnchor="452.0" AnchorPane.topAnchor="71.0">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Código de Máquina" />
-            <TableView VBox.vgrow="ALWAYS">
+            <TableView fx:id="tvAssembly" VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn prefWidth="75.0" text="Linha" />
-                  <TableColumn prefWidth="75.0" text="Instrução" />
-                  <TableColumn prefWidth="75.0" text="Atributo 1" />
-                  <TableColumn prefWidth="75.0" text="Atributo 2" />
+                  <TableColumn fx:id="tcLine" editable="false" prefWidth="53.0" resizable="false" sortable="false" text="Linha" />
+                  <TableColumn fx:id="tcLabel" prefWidth="117.0" sortable="false" text="Rótulo" />
+                  <TableColumn fx:id="tcInstruction" prefWidth="117.0" sortable="false" text="Instrução" />
+                  <TableColumn fx:id="tcArg1" prefWidth="118.0" sortable="false" text="Atributo 1" />
+                  <TableColumn fx:id="tcArg2" prefWidth="118.0" sortable="false" text="Atributo 2" />
                </columns>
                <VBox.margin>
                   <Insets top="10.0" />
@@ -81,8 +87,8 @@
             <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Memória pilha" />
             <TableView VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn prefWidth="75.0" text="Endereço" />
-                  <TableColumn prefWidth="75.0" text="Valor" />
+                  <TableColumn prefWidth="75.0" sortable="false" text="Endereço" />
+                  <TableColumn prefWidth="75.0" sortable="false" text="Valor" />
                </columns>
                <VBox.margin>
                   <Insets top="10.0" />
@@ -96,7 +102,7 @@
       <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="52.0" AnchorPane.topAnchor="618.0">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Saída de dados" />
-            <TextArea prefHeight="200.0" prefWidth="200.0">
+            <TextArea editable="false" prefHeight="200.0" prefWidth="200.0">
                <VBox.margin>
                   <Insets top="10.0" />
                </VBox.margin>
