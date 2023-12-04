@@ -1,7 +1,5 @@
 package com.example.virtualmachine.handlers;
 
-import org.controlsfx.control.tableview2.filter.filtereditor.SouthFilter;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -96,22 +94,22 @@ public class CodeRunner {
                     memory.set(stackPointer, String.valueOf(value));
                 }
                 case "CME" -> {
-                    resolveExpression("<");
+                    resolveRelational("<");
                 }
                 case "CMA" -> {
-                    resolveExpression(">");
+                    resolveRelational(">");
                 }
                 case "CEQ" -> {
-                    resolveExpression("==");
+                    resolveRelational("==");
                 }
                 case "CDIF" -> {
-                    resolveExpression("!=");
+                    resolveRelational("!=");
                 }
                 case "CMEQ" -> {
-                    resolveExpression("<=");
+                    resolveRelational("<=");
                 }
                 case "CMAQ" -> {
-                    resolveExpression(">=");
+                    resolveRelational(">=");
                 }
                 case "STR" -> {
                     String value = memory.get(stackPointer);
@@ -164,7 +162,7 @@ public class CodeRunner {
                     int varAmount = Integer.parseInt(arg2);
                     String value;
 
-                    for (int k = varAmount; k > 0; k--) {
+                    for (int k = varAmount - 1; k >= 0; k--) {
                         value = memory.get(stackPointer);
                         memory.set(memoryOffset + k, value);
                         stackPointer--;
@@ -201,7 +199,7 @@ public class CodeRunner {
         }
     }
 
-    private void resolveExpression(String s) {
+    private void resolveRelational(String s) {
         int leftValue = Integer.parseInt(memory.get(stackPointer - 1));
         int rightValue = Integer.parseInt(memory.get(stackPointer));
 
@@ -274,7 +272,7 @@ public class CodeRunner {
     }
 
     private void allocMemory(int size) {
-        for (int i = 0; i<size;i++) {
+        for (int i = 0; i < size; i++) {
             memory.add("0");
         }
     }
