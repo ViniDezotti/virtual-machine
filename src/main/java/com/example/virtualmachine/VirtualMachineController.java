@@ -27,7 +27,10 @@ public class VirtualMachineController implements Initializable {
     private Button btnStart, btnStop, btnSubmit;
 
     @FXML
-    private TextField tfInput, tfOutput;
+    private TextField tfInput;
+
+    @FXML
+    private TextArea taOutput;
 
     @FXML
     private ToggleGroup selectMode;
@@ -65,8 +68,6 @@ public class VirtualMachineController implements Initializable {
         rbPassThrough.setToggleGroup(selectMode);
         selectMode.selectedToggleProperty().addListener((observableValue, toggle, t1) ->
                 normalMode = rbNormalMode.isSelected());
-        tfInput.focusedProperty().not();
-        tfOutput.focusedProperty().not();
     }
 
     @FXML
@@ -88,7 +89,6 @@ public class VirtualMachineController implements Initializable {
         btnStop.setDisable(false);
         loadAssemblyList();
     }
-
 
     @FXML
     private void loadAssemblyList() {
@@ -119,8 +119,12 @@ public class VirtualMachineController implements Initializable {
     }
 
     private void printOutput(String value) {
-        tfOutput.setText(value);
-        tfOutput.requestFocus();
+        codeRunner.setStackPointer(codeRunner.getStackPointer() - 1);
+        taOutput.setText(taOutput.getText() + "\n" + value);
+        codeRunner.setProgramCounter(codeRunner.getProgramCounter() + 1);
+        taOutput.requestFocus();
+        memoryStackStatus();
+        paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
     }
 
     private boolean needPrint() {
@@ -134,18 +138,23 @@ public class VirtualMachineController implements Initializable {
             return;
         }
         if (normalMode) {
-            if (!codeRunner.executeAll()){
-                enableInput(true);
+            if (!codeRunner.executeAll()) {
+                if (needPrint()) {
+                    printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
+                } else {
+                    enableInput(true);
+                }
                 return;
             }
         } else {
             if (!codeRunner.executeStepByStep()) {
-                enableInput(true);
+                if (needPrint()) {
+                    printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
+                } else {
+                    enableInput(true);
+                }
                 return;
             }
-        }
-        if (needPrint()) {
-            printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
         }
         memoryStackStatus();
         paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
@@ -153,7 +162,7 @@ public class VirtualMachineController implements Initializable {
 
     @FXML
     private void stopProgram() {
-        tfOutput.clear();
+        taOutput.clear();
         tfInput.clear();
         btnStart.setDisable(true);
         btnStop.setDisable(true);
@@ -180,13 +189,15 @@ public class VirtualMachineController implements Initializable {
             codeRunner.setProgramCounter(codeRunner.getProgramCounter() + 1);
             enableInput(false);
             memoryStackStatus();
+            paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
+            startProgram();
         } else {
             missingInputValue();
         }
     }
 
     private void paintActualRow(int programCounter, int stackPointer) {
-        System.out.println(programCounter);
+        System.out.println(programCounter + "    " + stackPointer);
         tvAssembly.getSelectionModel().select(programCounter);
         tvAssembly.scrollTo(programCounter);
         tvMemory.getSelectionModel().select(stackPointer);

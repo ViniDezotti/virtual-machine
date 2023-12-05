@@ -84,7 +84,7 @@ public class CodeRunner {
 
     public boolean executeAll() {
         while (programCounter < code.size()) {
-            if (code.get(programCounter).contains("RD")) {
+            if (code.get(programCounter).contains("RD") || code.get(programCounter).contains("PRN")) {
                 return false;
             }
             execute();
@@ -97,7 +97,7 @@ public class CodeRunner {
         if (programCounter < code.size()) {
             execute();
         }
-        return !code.get(programCounter).contains("RD");
+        return !code.get(programCounter).contains("RD") || !code.get(programCounter).contains("PRN");
     }
 
     public void execute() {
@@ -190,16 +190,10 @@ public class CodeRunner {
             case "NULL" -> {
             }
             case "RD" -> {
-//                stackPointer++;
-//                //TODO memory.push(entrada)
-//                Scanner scanner = new Scanner(System.in);
-//                System.out.print("Leia (" + code.get(programCounter+1).substring(12, 16) + "): ");
-//                memory.set(stackPointer, value);
+                
             }
             case "PRN" -> {
-                //TODO imprimir(memory.pop);
                 System.out.println("Print: " + memory.get(stackPointer));
-                stackPointer--;
             }
             case "START" -> {
                 this.stackPointer = -1;
