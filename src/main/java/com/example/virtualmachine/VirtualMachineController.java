@@ -77,6 +77,7 @@ public class VirtualMachineController implements Initializable {
         fileChooser.setInitialDirectory(new File("c:\\"));
         File selectedFile = fileChooser.showOpenDialog(stage);
         if (selectedFile != null) {
+            stopProgram();
             codeRunner = new CodeRunner(selectedFile.toString());
             enableComponents();
         } else {
@@ -190,6 +191,7 @@ public class VirtualMachineController implements Initializable {
             enableInput(false);
             memoryStackStatus();
             paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
+            tfInput.clear();
             startProgram();
         } else {
             missingInputValue();
