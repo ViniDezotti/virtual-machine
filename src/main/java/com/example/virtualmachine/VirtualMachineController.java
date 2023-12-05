@@ -68,6 +68,10 @@ public class VirtualMachineController implements Initializable {
         rbPassThrough.setToggleGroup(selectMode);
         selectMode.selectedToggleProperty().addListener((observableValue, toggle, t1) ->
                 normalMode = rbNormalMode.isSelected());
+        tfInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.matches("\\d*")) return;
+            tfInput.setText(newValue.replaceAll("[^\\d]", ""));
+        });
     }
 
     @FXML
