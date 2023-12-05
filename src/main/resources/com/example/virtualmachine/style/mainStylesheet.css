@@ -9,3 +9,7 @@
     -fx-border-color: #bbbbbb;
     -fx-border-width: 1 px
 }
+
+.table-row-cell:focused {
+    -fx-background-color: rgba(6, 73, 255, 0.51);
+}

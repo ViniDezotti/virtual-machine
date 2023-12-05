@@ -8,7 +8,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -28,12 +28,12 @@
       </MenuBar>
       <HBox prefHeight="35.0" AnchorPane.bottomAnchor="547.0" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="1046.0" AnchorPane.topAnchor="186.0">
          <children>
-            <Button fx:id="btnStart" disable="true" mnemonicParsing="false" prefHeight="35.0" prefWidth="119.0" text="Iniciar" HBox.hgrow="ALWAYS">
+            <Button fx:id="btnStart" disable="true" mnemonicParsing="false" onAction="#startProgram" prefHeight="35.0" prefWidth="119.0" text="Iniciar" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets />
                </HBox.margin>
             </Button>
-            <Button fx:id="btnStop" disable="true" mnemonicParsing="false" prefHeight="35.0" prefWidth="119.0" text="Parar">
+            <Button fx:id="btnStop" disable="true" mnemonicParsing="false" onAction="#stopProgram" prefHeight="35.0" prefWidth="119.0" text="Parar">
                <HBox.margin>
                   <Insets left="24.0" />
                </HBox.margin>
@@ -62,16 +62,16 @@
             </RadioButton>
          </children>
       </VBox>
-      <VBox layoutX="157.0" layoutY="100.0" prefHeight="570.0" prefWidth="523.0" AnchorPane.bottomAnchor="155.0" AnchorPane.leftAnchor="344.0" AnchorPane.rightAnchor="452.0" AnchorPane.topAnchor="71.0">
+      <VBox layoutX="157.0" layoutY="100.0" prefHeight="570.0" prefWidth="523.0" AnchorPane.bottomAnchor="131.0" AnchorPane.leftAnchor="344.0" AnchorPane.rightAnchor="452.0" AnchorPane.topAnchor="71.0">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Código de Máquina" />
             <TableView fx:id="tvAssembly" VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn fx:id="tcLine" editable="false" prefWidth="53.0" resizable="false" sortable="false" text="Linha" />
-                  <TableColumn fx:id="tcLabel" prefWidth="117.0" sortable="false" text="Rótulo" />
-                  <TableColumn fx:id="tcInstruction" prefWidth="117.0" sortable="false" text="Instrução" />
-                  <TableColumn fx:id="tcArg1" prefWidth="118.0" sortable="false" text="Atributo 1" />
-                  <TableColumn fx:id="tcArg2" prefWidth="118.0" sortable="false" text="Atributo 2" />
+                  <TableColumn fx:id="tcLine" resizable="false" sortable="false" text="Linha" />
+                  <TableColumn fx:id="tcLabel" sortable="false" text="Rótulo" />
+                  <TableColumn fx:id="tcInstruction" sortable="false" text="Instrução" />
+                  <TableColumn fx:id="tcArg1" sortable="false" text="Atributo 1" />
+                  <TableColumn fx:id="tcArg2" sortable="false" text="Atributo 2" />
                </columns>
                <VBox.margin>
                   <Insets top="10.0" />
@@ -82,13 +82,13 @@
             </TableView>
          </children>
       </VBox>
-      <VBox AnchorPane.bottomAnchor="155.0" AnchorPane.leftAnchor="938.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="71.0">
+      <VBox AnchorPane.bottomAnchor="131.0" AnchorPane.leftAnchor="938.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="71.0">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Memória pilha" />
-            <TableView VBox.vgrow="ALWAYS">
+            <TableView fx:id="tvMemory" VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn prefWidth="75.0" sortable="false" text="Endereço" />
-                  <TableColumn prefWidth="75.0" sortable="false" text="Valor" />
+                  <TableColumn fx:id="tcAddress" prefWidth="75.0" sortable="false" text="Endereço" />
+                  <TableColumn fx:id="tcValue" prefWidth="75.0" sortable="false" text="Valor" />
                </columns>
                <VBox.margin>
                   <Insets top="10.0" />
@@ -99,14 +99,36 @@
             </TableView>
          </children>
       </VBox>
-      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="52.0" AnchorPane.topAnchor="618.0">
+      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="695.0" AnchorPane.topAnchor="668.0">
          <children>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Saída de dados" />
-            <TextArea editable="false" prefHeight="200.0" prefWidth="200.0">
+            <HBox prefHeight="100.0" prefWidth="200.0" spacing="439.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Entrada de dados">
+                     <HBox.margin>
+                        <Insets bottom="10.0" />
+                     </HBox.margin>
+                  </Text>
+                  <Button fx:id="btnSubmit" disable="true" mnemonicParsing="false" onAction="#submitValue" text="Inserir">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+            <TextField fx:id="tfInput" editable="false" />
+         </children>
+      </VBox>
+      <VBox layoutX="62.0" layoutY="654.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="695.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="668.0">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Saida de dados" />
+            <TextField fx:id="tfOutput" editable="false">
                <VBox.margin>
                   <Insets top="10.0" />
                </VBox.margin>
-            </TextArea>
+            </TextField>
          </children>
       </VBox>
    </children>

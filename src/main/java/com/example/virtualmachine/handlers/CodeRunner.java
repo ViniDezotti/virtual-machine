@@ -82,16 +82,22 @@ public class CodeRunner {
         return code;
     }
 
-    public void executeAll() {
+    public boolean executeAll() {
         while (programCounter < code.size()) {
+            if (code.get(programCounter).contains("RD")) {
+                return false;
+            }
             execute();
         }
+        programCounter--;
+        return true;
     }
 
-    public void executeStepByStep() {
+    public boolean executeStepByStep() {
         if (programCounter < code.size()) {
             execute();
         }
+        return !code.get(programCounter).contains("RD");
     }
 
     public void execute() {
@@ -182,14 +188,13 @@ public class CodeRunner {
                 stackPointer--;
             }
             case "NULL" -> {
-
             }
             case "RD" -> {
-                stackPointer++;
-                //TODO memory.push(entrada)
-                Scanner scanner = new Scanner(System.in);
-                System.out.print("Leia (" + code.get(programCounter+1).substring(12, 16) + "): ");
-                memory.set(stackPointer, scanner.nextLine());
+//                stackPointer++;
+//                //TODO memory.push(entrada)
+//                Scanner scanner = new Scanner(System.in);
+//                System.out.print("Leia (" + code.get(programCounter+1).substring(12, 16) + "): ");
+//                memory.set(stackPointer, value);
             }
             case "PRN" -> {
                 //TODO imprimir(memory.pop);
@@ -235,7 +240,6 @@ public class CodeRunner {
                 stackPointer--;
             }
             case "HLT" -> {
-                return;
             }
         }
 

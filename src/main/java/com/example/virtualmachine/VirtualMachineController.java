@@ -2,6 +2,7 @@ package com.example.virtualmachine;
 
 import com.example.virtualmachine.handlers.CodeRunner;
 import com.example.virtualmachine.model.Assembly;
+import com.example.virtualmachine.model.Memory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -20,18 +21,25 @@ public class VirtualMachineController implements Initializable {
     private Stage stage;
     private CodeRunner codeRunner;
     private ObservableList<Assembly> assemblyList = FXCollections.observableArrayList();
+    private ObservableList<Memory> memoryStack = FXCollections.observableArrayList();
 
     @FXML
-    private Button btnStart, btnStop;
+    private Button btnStart, btnStop, btnSubmit;
 
     @FXML
-    private MenuItem btnOpenFile;
+    private TextField tfInput, tfOutput;
 
     @FXML
     private ToggleGroup selectMode;
 
     @FXML
     private RadioButton rbNormalMode, rbPassThrough;
+
+    @FXML
+    private TableView<Memory> tvMemory;
+
+    @FXML
+    private TableColumn <Memory, Integer> tcAddress, tcValue;
 
     @FXML
     private TableView<Assembly> tvAssembly;
@@ -50,13 +58,16 @@ public class VirtualMachineController implements Initializable {
         tcInstruction.setCellValueFactory(new PropertyValueFactory<>("Instruction"));
         tcArg1.setCellValueFactory(new PropertyValueFactory<>("Arg1"));
         tcArg2.setCellValueFactory(new PropertyValueFactory<>("Arg2"));
+        tcAddress.setCellValueFactory(new PropertyValueFactory<>("Address"));
+        tcValue.setCellValueFactory(new PropertyValueFactory<>("Value"));
         tvAssembly.setItems(assemblyList);
         rbNormalMode.setToggleGroup(selectMode);
         rbPassThrough.setToggleGroup(selectMode);
         selectMode.selectedToggleProperty().addListener((observableValue, toggle, t1) ->
                 normalMode = rbNormalMode.isSelected());
+        tfInput.focusedProperty().not();
+        tfOutput.focusedProperty().not();
     }
-
 
     @FXML
     private void openFile() {
@@ -99,11 +110,94 @@ public class VirtualMachineController implements Initializable {
         alert.show();
     }
 
+    private void missingInputValue() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Entrada de dados vazia!");
+        alert.setContentText("Insira um valor numérico");
+        alert.setOnCloseRequest(dialogEvent -> enableInput(true));
+        alert.show();
+    }
+
+    private void printOutput(String value) {
+        tfOutput.setText(value);
+        tfOutput.requestFocus();
+    }
+
+    private boolean needPrint() {
+        return assemblyList.get(codeRunner.getProgramCounter()).getInstruction().equals("PRN");
+    }
+
+    @FXML
     private void startProgram() {
-        if (normalMode) {
-            codeRunner.executeStepByStep();
-        } else {
-            codeRunner.executeAll();
+        if (codeRunner.getProgramCounter() == assemblyList.size() - 1) {
+            btnStart.setDisable(true);
+            return;
         }
+        if (normalMode) {
+            if (!codeRunner.executeAll()){
+                enableInput(true);
+                return;
+            }
+        } else {
+            if (!codeRunner.executeStepByStep()) {
+                enableInput(true);
+                return;
+            }
+        }
+        if (needPrint()) {
+            printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
+        }
+        memoryStackStatus();
+        paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
+    }
+
+    @FXML
+    private void stopProgram() {
+        tfOutput.clear();
+        tfInput.clear();
+        btnStart.setDisable(true);
+        btnStop.setDisable(true);
+        tvAssembly.getItems().clear();
+        tvMemory.getItems().clear();
+        assemblyList.clear();
+        memoryStack.clear();
+    }
+
+    private void enableInput(boolean status) {
+        // TODO textField aceitar somente 1 numero
+        tvAssembly.getSelectionModel().select(codeRunner.getProgramCounter());
+        btnStart.setDisable(status);
+        tfInput.requestFocus();
+        tfInput.setEditable(status);
+        btnSubmit.setDisable(!status);
+    }
+
+    @FXML
+    private void submitValue() {
+        if (!tfInput.getText().isEmpty() && !tfInput.getText().isBlank()) {
+            codeRunner.setStackPointer(codeRunner.getStackPointer() + 1);
+            codeRunner.getMemory().set(codeRunner.getStackPointer(), tfInput.getText());
+            codeRunner.setProgramCounter(codeRunner.getProgramCounter() + 1);
+            enableInput(false);
+            memoryStackStatus();
+        } else {
+            missingInputValue();
+        }
+    }
+
+    private void paintActualRow(int programCounter, int stackPointer) {
+        System.out.println(programCounter);
+        tvAssembly.getSelectionModel().select(programCounter);
+        tvAssembly.scrollTo(programCounter);
+        tvMemory.getSelectionModel().select(stackPointer);
+        tvMemory.scrollTo(stackPointer);
+    }
+
+    private void memoryStackStatus() {
+        memoryStack.clear();
+        for (int i = 0; i <= codeRunner.getStackPointer(); i++) {
+            memoryStack.add(new Memory(i, Integer.parseInt(codeRunner.getMemory().get(i))));
+        }
+        tvMemory.setItems(memoryStack);
     }
 }
