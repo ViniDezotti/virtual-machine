@@ -79,16 +79,16 @@ public class VirtualMachineController implements Initializable {
         if (selectedFile != null) {
             stopProgram();
             codeRunner = new CodeRunner(selectedFile.toString());
-            enableComponents();
+            enableComponents(true);
+            loadAssemblyList();
         } else {
-            wrongFileAlert();
+            errorAlert("Arquivo inválido", "Escolha um arquivo do tipo objeto (.obj)");
         }
     }
 
-    private void enableComponents() {
-        btnStart.setDisable(false);
-        btnStop.setDisable(false);
-        loadAssemblyList();
+    private void enableComponents(Boolean status) {
+        btnStart.setDisable(!status);
+        btnStop.setDisable(!status);
     }
 
     @FXML
@@ -104,14 +104,16 @@ public class VirtualMachineController implements Initializable {
         }
     }
 
-    private void wrongFileAlert() {
+    private void errorAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Arquivo inválido");
-        alert.setContentText("Escolha um arquivo do tipo objeto (.obj)");
+        alert.setTitle(title);
+        alert.setHeaderText(title);
+        alert.setContentText(content);
         alert.show();
+        enableComponents(false);
     }
 
-    private void missingInputValue() {
+    private void wrongInputValue() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Entrada de dados vazia!");
         alert.setContentText("Insira um valor numérico");
@@ -123,9 +125,11 @@ public class VirtualMachineController implements Initializable {
         codeRunner.setStackPointer(codeRunner.getStackPointer() - 1);
         taOutput.setText(taOutput.getText() + "\n" + value);
         codeRunner.setProgramCounter(codeRunner.getProgramCounter() + 1);
+        taOutput.setScrollTop(Double.MAX_VALUE);
         taOutput.requestFocus();
         memoryStackStatus();
         paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
+        startProgram();
     }
 
     private boolean needPrint() {
@@ -134,31 +138,35 @@ public class VirtualMachineController implements Initializable {
 
     @FXML
     private void startProgram() {
-        if (codeRunner.getProgramCounter() == assemblyList.size() - 1) {
-            btnStart.setDisable(true);
-            return;
-        }
-        if (normalMode) {
-            if (!codeRunner.executeAll()) {
-                if (needPrint()) {
-                    printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
-                } else {
-                    enableInput(true);
-                }
+        try {
+            if (codeRunner.getProgramCounter() == assemblyList.size() - 1) {
+                btnStart.setDisable(true);
                 return;
             }
-        } else {
-            if (!codeRunner.executeStepByStep()) {
-                if (needPrint()) {
-                    printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
-                } else {
-                    enableInput(true);
+            if (normalMode) {
+                if (!codeRunner.executeAll()) {
+                    if (needPrint()) {
+                        printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
+                    } else {
+                        enableInput(true);
+                    }
+                    return;
                 }
-                return;
+            } else {
+                if (!codeRunner.executeStepByStep()) {
+                    if (needPrint()) {
+                        printOutput(codeRunner.getMemory().get(codeRunner.getStackPointer()));
+                    } else {
+                        enableInput(true);
+                    }
+                    return;
+                }
             }
+            memoryStackStatus();
+            paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
+        } catch (RuntimeException e) {
+            errorAlert("Erro ao executar programa", "Verifique se o objeto está correto");
         }
-        memoryStackStatus();
-        paintActualRow(codeRunner.getProgramCounter(), codeRunner.getStackPointer());
     }
 
     @FXML
@@ -174,7 +182,6 @@ public class VirtualMachineController implements Initializable {
     }
 
     private void enableInput(boolean status) {
-        // TODO textField aceitar somente 1 numero
         tvAssembly.getSelectionModel().select(codeRunner.getProgramCounter());
         btnStart.setDisable(status);
         tfInput.requestFocus();
@@ -194,12 +201,11 @@ public class VirtualMachineController implements Initializable {
             tfInput.clear();
             startProgram();
         } else {
-            missingInputValue();
+            wrongInputValue();
         }
     }
 
     private void paintActualRow(int programCounter, int stackPointer) {
-        System.out.println(programCounter + "    " + stackPointer);
         tvAssembly.getSelectionModel().select(programCounter);
         tvAssembly.scrollTo(programCounter);
         tvMemory.getSelectionModel().select(stackPointer);

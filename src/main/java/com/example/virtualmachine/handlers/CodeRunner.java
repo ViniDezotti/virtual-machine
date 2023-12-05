@@ -190,7 +190,7 @@ public class CodeRunner {
             case "NULL" -> {
             }
             case "RD" -> {
-                
+
             }
             case "PRN" -> {
                 System.out.println("Print: " + memory.get(stackPointer));
@@ -234,6 +234,7 @@ public class CodeRunner {
                 stackPointer--;
             }
             case "HLT" -> {
+
             }
         }
 
