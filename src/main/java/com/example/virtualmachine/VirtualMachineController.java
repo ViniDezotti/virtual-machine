@@ -3,6 +3,7 @@ package com.example.virtualmachine;
 import com.example.virtualmachine.handlers.CodeRunner;
 import com.example.virtualmachine.model.Assembly;
 import com.example.virtualmachine.model.Memory;
+import com.example.virtualmachine.utils.Constraints;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -68,10 +69,7 @@ public class VirtualMachineController implements Initializable {
         rbPassThrough.setToggleGroup(selectMode);
         selectMode.selectedToggleProperty().addListener((observableValue, toggle, t1) ->
                 normalMode = rbNormalMode.isSelected());
-        tfInput.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.matches("\\d*")) return;
-            tfInput.setText(newValue.replaceAll("[^\\d]", ""));
-        });
+        Constraints.setTextFieldInteger(tfInput);
     }
 
     @FXML
